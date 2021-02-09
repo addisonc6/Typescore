@@ -8,11 +8,10 @@
 #define MAX_CHARS 2000
 #define NUM_TEXTS 6000
 
-void set_cursor_pos(int x_offset, int y_offset);
+void set_cursor_offset(int x_offset, int y_offset);
 void get_target_text(char* buffer);
 int setup(void);
 int get_wc(char *str);
-int update_av_wpm(int elapsed, int num_words);
-int update_accuracy(float acc);
 int get_mode_option(void);
 void show_stats(void);
+void update_av_wpm_accuracy(int elapsed, int num_words, float acc); 

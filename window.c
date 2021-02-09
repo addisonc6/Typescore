@@ -12,27 +12,27 @@ typedef struct {
   } Buffer;
 
 typedef struct {
-  int mistakes;
-  volatile bool finished;
+  float mistakes;
+  bool finished;
   float accuracy;
 } Pstate;
 
 void render_scr(char *target_text, char *typed_text, Pstate *pstate);
 
 int main() {
+  srand(time(NULL));
   int error, av_wpm;
   Buffer buff;
   Pstate pstate;
   char target[MAX_CHARS];
-  int counter = 0;
-  time_t start_timer;
+  int practice_counter = 0;
   int n_samples = get_mode_option();
-  if(n_samples == - 1) {
+  if(n_samples == -1) {
     exit(EXIT_SUCCESS);
   }
-  while(counter < n_samples) {
+  while(practice_counter < n_samples) {
     int p;
-    if((error = setup()) == -1) {
+    if((error = setup()) != 0) {
       exit(EXIT_FAILURE);
       } 
     buff.index = 0;
@@ -45,9 +45,10 @@ int main() {
     get_target_text(target);
     (void) system("clear");
     render_scr(target, buff.typed, &pstate);
-    start_timer = time(NULL);
+    time_t start_timer = time(NULL);
     pstate.mistakes = 0;
     pstate.finished = FALSE;
+    
     while(pstate.finished == FALSE) {
       wrefresh(stdscr);
       int ch = getch();
@@ -57,13 +58,7 @@ int main() {
         buff.index++;
         render_scr(target, buff.typed, &pstate);
       }
-      else if(ch >= CH_SPACE && ch <= CH_FSLASH) {
-        p = buff.index;
-        buff.typed[p] = ch;
-        buff.index++;
-        render_scr(target, buff.typed, &pstate);
-      }
-      else if(ch >= CH_COLON && ch <= CH_AT) {
+      else if((ch >= CH_SPACE && ch <= CH_FSLASH) || (ch >= CH_COLON && ch <= CH_AT)) {
         p = buff.index;
         buff.typed[p] = ch;
         buff.index++;
@@ -74,19 +69,18 @@ int main() {
         exit(EXIT_SUCCESS);
       }
       else {
-      
+        //ignore keypress
       }
     }
-    counter++;
+    practice_counter++;
     time_t elapsed = time(NULL) - start_timer;
-    int av_wpm = update_av_wpm((int) elapsed, get_wc(target));
-    //int update_acc = update_accuracy(pstate.accuracy);
+    update_av_wpm_accuracy((int) elapsed, get_wc(target), pstate.accuracy);
   }
   endwin();
   exit(EXIT_SUCCESS);
 }
 
-void set_cursor_pos(int x_offset, int y_offset) {
+void set_cursor_offset(int x_offset, int y_offset) {
   int x, y;
   getyx(stdscr, y, x);
   wmove(stdscr, y + y_offset, x + x_offset);
@@ -96,7 +90,7 @@ void set_cursor_pos(int x_offset, int y_offset) {
 void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
   int i, j, x, y;
   int len_typed= 0;
-  int correct = 0;
+  float correct = 0;
   char *top_message = "Press 9 to ESC";
   for(i = 0; i < MAX_CHARS; i++) {
     if(typed_text[i] != '\0'){
@@ -126,12 +120,12 @@ void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
   }
   if(strlen(typed_text) >= strlen(target_text) - 1) {
     pstate->finished = TRUE;
-    pstate->accuracy = correct / (pstate->mistakes + correct);
+    pstate->accuracy = 100 * (correct / strlen(target_text));
   }
   if(pstate->finished == FALSE) {
     getyx(stdscr, y, x);
     wmove(stdscr, y, 0);
-    set_cursor_pos(0, 2);
+    set_cursor_offset(0, 2);
     for(i = 0; i < len_typed; i++) {
       addch(typed_text[i]);
     }
@@ -154,70 +148,57 @@ void get_target_text(char* buffer) {
 }
 
 int setup(void) {
-  srand(time(NULL));
-  initscr();
-  cbreak();
-  start_color();
-  use_default_colors();
+  int error = FALSE;
+  (void) initscr();
+  if((error = cbreak()) != 0) {
+    return(error);
+  }
+  if(has_colors() != TRUE) {
+    fprintf(stderr, "This program requires terminal color capability\n");
+    endwin();
+    exit(EXIT_FAILURE);
+  }
+  (void) start_color();
+  (void) use_default_colors();
   init_pair(1, COLOR_YELLOW, COLOR_BLACK);
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
   init_pair(3, COLOR_WHITE, COLOR_BLACK);
-  noecho();
-  idlok(stdscr, TRUE);
-  keypad(stdscr, TRUE);
-  return(0);
+  if((error = noecho()) != 0) {
+    return(error);
+  }
+  (void) idlok(stdscr, TRUE);
+  (void) keypad(stdscr, TRUE);
+  return(error);
 }
 
-int update_av_wpm(int elapsed, int num_words) {
-    int wpm = (int) ((num_words / elapsed) * 60);
-    FILE *file;
-    if((file = fopen("stats.txt", "r")) == NULL) {
-      fprintf(stderr, "Error: Could not read file\n");
-      exit(EXIT_FAILURE);
-    }
-    char *filebuff;
-    size_t bufflen = MAX_CHARS;
-    getline(&filebuff, &bufflen, file);
-    int prev_av_wpm = atoi(filebuff);
-    getline(&filebuff, &bufflen, file);
-    int occurences = atoi(filebuff);
-    int av_wpm = (int) (((prev_av_wpm * occurences) + wpm) / (occurences + 1));
-    (void) fclose(file);
-    if((file = fopen("stats.txt", "w")) == NULL) {
-      fprintf(stderr, "Error: Could not write to file\n");
-      exit(EXIT_FAILURE);
-    }
-    fprintf(file, "%d\n%d", av_wpm, occurences + 1);
-    (void) fclose(file);
-    return av_wpm;
+void update_av_wpm_accuracy(int elapsed, int num_words, float acc) {
+  int wpm = (int) (( (float) num_words / (float) elapsed) * 60);
+  FILE *file;
+  if((file = fopen("stats.txt", "r")) == NULL) {
+    fprintf(stderr, "Error: Could not read file\n");
+    exit(EXIT_FAILURE);
+  }
+  char *filebuff;
+  size_t bufflen = MAX_CHARS;
+  getline(&filebuff, &bufflen, file);
+  int prev_wpm = atoi(filebuff);
+  getline(&filebuff, &bufflen, file);
+  int wpm_occurences = atoi(filebuff);
+  getline(&filebuff, &bufflen, file);
+  float prev_acc = atof(filebuff);
+  getline(&filebuff, &bufflen, file);
+  int acc_occurences = atoi(filebuff);
+  int av_wpm = (int) ((((float)prev_wpm * wpm_occurences) + wpm) / (wpm_occurences + 1));
+  float av_acc = (((prev_acc * acc_occurences) + acc) / (acc_occurences + 1));
+  (void) fclose(file);
+  if((file = fopen("stats.txt", "w")) == NULL) {
+    fprintf(stderr, "Error: Could not write to file\n");
+    exit(EXIT_FAILURE);
+  }
+  fprintf(file, "%d\n%d\n%f\n%d", av_wpm, wpm_occurences + 1, av_acc, acc_occurences + 1);
+  (void) fclose(file);
 }
 
-int update_accuracy(float acc) {
-    FILE *file;
-    if((file = fopen("stats.txt", "r")) == NULL) {
-      fprintf(stderr, "Error: Could not read file\n");
-      exit(EXIT_FAILURE);
-    }
-    char *filebuff;
-    size_t bufflen = MAX_CHARS;
-    getline(&filebuff, &bufflen, file);
-    int rewrite_wpm = atoi(filebuff);
-    getline(&filebuff, &bufflen, file);
-    int rewrite_wpm_occurences = atoi(filebuff);
-    getline(&filebuff, &bufflen, file);
-    float prev_acc = atoi(filebuff);
-    getline(&filebuff, &bufflen, file);
-    int occurences = atoi(filebuff);
-    float av_acc = (((prev_acc * occurences) + acc) / (occurences + 1));
-    (void) fclose(file);
-    if((file = fopen("stats.txt", "w")) == NULL) {
-      fprintf(stderr, "Error: Could not write to file\n");
-      exit(EXIT_FAILURE);
-    }
-    fprintf(file, "%d\n%d\n%f\n%d", rewrite_wpm, rewrite_wpm_occurences, av_acc, occurences + 1);
-    (void) fclose(file);
-    return av_acc;
-}
 int get_wc(char *str) {
   int wc = 0;
   for(int i = 0; i < strlen(str); i++){
@@ -268,7 +249,7 @@ void show_stats(void) {
     fscanf(filep, "%f", &acc);
     (void) fclose(filep);
     printf("AVERAGE WPM: %d\n", wpm);
-    //printf("AVERAGE ACCURACY: %0.2f%%\n", acc);
+    printf("AVERAGE ACCURACY: %0.2f%%\n", acc);
   }
   else{
     printf("Could not open stats file\n");
