@@ -6,25 +6,13 @@
 #include <stdbool.h>
 #include <time.h>
 
-typedef struct {
-    char typed[MAX_CHARS];
-    int index;
-  } Buffer;
-
-typedef struct {
-  float mistakes;
-  bool finished;
-  float accuracy;
-} Pstate;
-
-void render_scr(char *target_text, char *typed_text, Pstate *pstate);
-
 int main() {
   srand(time(NULL));
   int error, av_wpm;
   Buffer buff;
   Pstate pstate;
-  char target[MAX_CHARS];
+  buff.typed = (char*) calloc(MAX_CHARS, sizeof(char));
+  char *target = (char*) calloc(MAX_CHARS, sizeof(char));
   int practice_counter = 0;
   int n_samples = get_mode_option();
   if(n_samples == -1) {
@@ -36,12 +24,8 @@ int main() {
       exit(EXIT_FAILURE);
       } 
     buff.index = 0;
-    for(int i = 0; i < MAX_CHARS; i++) {
-      buff.typed[i] = '\0';
-    }
-    for(int i = 0; i < MAX_CHARS; i++) {
-      target[i] = '\0';
-    }
+    memset(buff.typed, 0, sizeof(char) * MAX_CHARS);
+    memset(target, 0, sizeof(char) * MAX_CHARS);
     get_target_text(target);
     (void) system("clear");
     render_scr(target, buff.typed, &pstate);
@@ -77,6 +61,8 @@ int main() {
     update_av_wpm_accuracy((int) elapsed, get_wc(target), pstate.accuracy);
   }
   endwin();
+  free(buff.typed);
+  free(target);
   exit(EXIT_SUCCESS);
 }
 
@@ -88,10 +74,9 @@ void set_cursor_offset(int x_offset, int y_offset) {
 }
 
 void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
-  int i, j, x, y;
-  int len_typed= 0;
+  int i, x, y;
+  int len_typed = 0;
   float correct = 0;
-  char *top_message = "Press 9 to ESC";
   for(i = 0; i < MAX_CHARS; i++) {
     if(typed_text[i] != '\0'){
       len_typed++;
@@ -248,8 +233,10 @@ void show_stats(void) {
     fscanf(filep, "%d", &wpm_occurence);
     fscanf(filep, "%f", &acc);
     (void) fclose(filep);
+    printf("##### STATS #####\n\n");
     printf("AVERAGE WPM: %d\n", wpm);
-    printf("AVERAGE ACCURACY: %0.2f%%\n", acc);
+    printf("AVERAGE ACCURACY: %0.2f%%\n\n", acc);
+    printf("#################\n");
   }
   else{
     printf("Could not open stats file\n");

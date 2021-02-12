@@ -1,3 +1,5 @@
+#pragma once
+#include <stdbool.h>
 #define CH_DEL 127
 #define CH_SPACE 32
 #define CH_FSLASH 47
@@ -8,6 +10,18 @@
 #define MAX_CHARS 2000
 #define NUM_TEXTS 6000
 
+typedef struct {
+    char *typed;
+    int index;
+  } Buffer;
+
+typedef struct {
+  float mistakes;
+  bool finished;
+  float accuracy;
+} Pstate;
+
+void render_scr(char *target_text, char *typed_text, Pstate *pstate);
 void set_cursor_offset(int x_offset, int y_offset);
 void get_target_text(char* buffer);
 int setup(void);
