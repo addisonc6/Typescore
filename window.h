@@ -9,6 +9,9 @@
 #define CH_AT 64
 #define MAX_CHARS 2000
 #define NUM_TEXTS 6000
+#define EXIT_MAIN -1
+#define PRACTICE_MIN 1
+#define PRACTICE_MAX 1001
 
 typedef struct {
     char *typed;

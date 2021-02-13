@@ -15,7 +15,7 @@ int main() {
   char *target = (char*) calloc(MAX_CHARS, sizeof(char));
   int practice_counter = 0;
   int n_samples = get_mode_option();
-  if(n_samples == -1) {
+  if(n_samples == EXIT_MAIN) {
     exit(EXIT_SUCCESS);
   }
   while(practice_counter < n_samples) {
@@ -121,12 +121,12 @@ void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
 
 void get_target_text(char* buffer) {
     size_t buffsize = MAX_CHARS;
-    int q = rand() % (NUM_TEXTS - 1);
+    int quote_num = rand() % (NUM_TEXTS - 1);
     FILE* file;
     if((file = fopen("quotedata.txt", "r")) == NULL) {
       fprintf(stderr, "Error: Could not read from file\n");
     }
-    for(int i = 0; i < q; i++) {
+    for(int i = 0; i < quote_num; i++) {
       getline(&buffer, &buffsize, file);
     }
     (void) fclose(file);
@@ -173,7 +173,7 @@ void update_av_wpm_accuracy(int elapsed, int num_words, float acc) {
   float prev_acc = atof(filebuff);
   getline(&filebuff, &bufflen, file);
   int acc_occurences = atoi(filebuff);
-  int av_wpm = (int) ((((float)prev_wpm * wpm_occurences) + wpm) / (wpm_occurences + 1));
+  int av_wpm = (int) ((((float) prev_wpm * wpm_occurences) + wpm) / (wpm_occurences + 1));
   float av_acc = (((prev_acc * acc_occurences) + acc) / (acc_occurences + 1));
   (void) fclose(file);
   if((file = fopen("stats.txt", "w")) == NULL) {
@@ -205,7 +205,7 @@ int get_mode_option(void) {
       while(TRUE) {
         getline(&get_option, &option_buff_len, stdin);
         int n_samples = atoi(get_option);
-        if(n_samples >= 0 && n_samples <= 1001) {
+        if(n_samples >= PRACTICE_MIN && n_samples <= PRACTICE_MAX) {
           return n_samples;
         }
         printf("Please choose number between 1 and 1000\n");
@@ -213,14 +213,14 @@ int get_mode_option(void) {
     }
     else if(strcmp(get_option,"S\n") == 0 || strcmp(get_option,"s\n") == 0 || strcmp(get_option,"stats\n") == 0){
       show_stats();
-      return(-1);
+      return(EXIT_MAIN);
     }
     else{
       printf("Invalid option: choose P for practice session or S to view stats\n");
       printf("You chose: %s\n", get_option);
     }
   }
-  return(-1);
+  return(EXIT_MAIN);
 }
 
 void show_stats(void) {
