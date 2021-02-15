@@ -66,13 +66,15 @@ int main() {
   exit(EXIT_SUCCESS);
 }
 
-void set_cursor_offset(int x_offset, int y_offset) {
+//set cursor offset from current position
+void set_cursor_offset(int y_offset, int x_offset) {
   int x, y;
   getyx(stdscr, y, x);
   wmove(stdscr, y + y_offset, x + x_offset);
   wrefresh(stdscr);
 }
 
+//redraw screen to update match between paragraph and typed text
 void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
   int i, x, y;
   int len_typed = 0;
@@ -110,7 +112,7 @@ void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
   if(pstate->finished == FALSE) {
     getyx(stdscr, y, x);
     wmove(stdscr, y, 0);
-    set_cursor_offset(0, 2);
+    set_cursor_offset(2, 0);
     for(i = 0; i < len_typed; i++) {
       addch(typed_text[i]);
     }
@@ -119,6 +121,7 @@ void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
   wrefresh(stdscr);
 }
 
+//picks from a sample of the quotes
 void get_target_text(char* buffer) {
     size_t buffsize = MAX_CHARS;
     int quote_num = rand() % (NUM_TEXTS - 1);
@@ -132,6 +135,7 @@ void get_target_text(char* buffer) {
     (void) fclose(file);
 }
 
+//curses initializations
 int setup(void) {
   int error = FALSE;
   (void) initscr();
@@ -156,6 +160,7 @@ int setup(void) {
   return(error);
 }
 
+//update wpm and accuracy
 void update_av_wpm_accuracy(int elapsed, int num_words, float acc) {
   int wpm = (int) (( (float) num_words / (float) elapsed) * 60);
   FILE *file;
@@ -184,6 +189,7 @@ void update_av_wpm_accuracy(int elapsed, int num_words, float acc) {
   (void) fclose(file);
 }
 
+//gets word counter in a paragraph
 int get_wc(char *str) {
   int wc = 0;
   for(int i = 0; i < strlen(str); i++){
@@ -194,10 +200,11 @@ int get_wc(char *str) {
   return wc;
 }
 
+//get action from user at program start
 int get_mode_option(void) {
   char* get_option;
   size_t option_buff_len = MAX_CHARS;
-  printf("Practice (P) or view stats (S)?\n");
+  fprintf(stdout, "Practice (P), or view Stats (S)?\n");
   while(TRUE) {
     getline(&get_option, &option_buff_len, stdin);
     if(strcmp(get_option, "P\n") == 0 || strcmp(get_option,"p\n") == 0 || strcmp(get_option,"practice\n") == 0) {
@@ -208,7 +215,7 @@ int get_mode_option(void) {
         if(n_samples >= PRACTICE_MIN && n_samples <= PRACTICE_MAX) {
           return n_samples;
         }
-        printf("Please choose number between 1 and 1000\n");
+        fprintf(stdout, "Please choose number between 1 and 1000\n");
       }
     }
     else if(strcmp(get_option,"S\n") == 0 || strcmp(get_option,"s\n") == 0 || strcmp(get_option,"stats\n") == 0){
@@ -216,13 +223,14 @@ int get_mode_option(void) {
       return(EXIT_MAIN);
     }
     else{
-      printf("Invalid option: choose P for practice session or S to view stats\n");
-      printf("You chose: %s\n", get_option);
+      fprintf(stdout, "Invalid option: choose P for practice session or S to view stats\n");
+      fprintf(stdout, "You chose: %s\n", get_option);
     }
   }
   return(EXIT_MAIN);
 }
 
+//print stats to stdout
 void show_stats(void) {
   int wpm;
   int wpm_occurence;
@@ -233,12 +241,13 @@ void show_stats(void) {
     fscanf(filep, "%d", &wpm_occurence);
     fscanf(filep, "%f", &acc);
     (void) fclose(filep);
-    printf("##### STATS #####\n\n");
-    printf("AVERAGE WPM: %d\n", wpm);
-    printf("AVERAGE ACCURACY: %0.2f%%\n\n", acc);
-    printf("#################\n");
+    fprintf(stdout, "##### STATS #####\n\n");
+    fprintf(stdout, "AVERAGE WPM: %d\n", wpm);
+    fprintf(stdout, "AVERAGE ACCURACY: %0.2f%%\n\n", acc);
+    fprintf(stdout, "#################\n");
   }
   else{
-    printf("Could not open stats file\n");
+    fprintf(stderr, "Could not open stats file\n");
   }
 }
+
