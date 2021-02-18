@@ -6,7 +6,12 @@
 #include <stdbool.h>
 #include <time.h>
 
-int main() {
+int main(int argc, char **argv) {
+  if(argc > 2) {
+    fprintf(stdout, "Usage: ./typescore [practice samples]\n");
+    exit(EXIT_FAILURE);
+  }
+  
   srand(time(NULL));
   int error, av_wpm;
   Buffer buff;
@@ -14,10 +19,17 @@ int main() {
   buff.typed = (char*) calloc(MAX_CHARS, sizeof(char));
   char *target = (char*) calloc(MAX_CHARS, sizeof(char));
   int practice_counter = 0;
-  int n_samples = get_mode_option();
-  if(n_samples == EXIT_MAIN) {
+  int n_samples;
+  if(argv[1] == NULL) {
+    int n_samples = get_mode_option();
+    if(n_samples == EXIT_MAIN) {
     exit(EXIT_SUCCESS);
+    }
   }
+  else {
+    n_samples = atoi(argv[1]);
+  }
+  
   while(practice_counter < n_samples) {
     int p;
     if((error = setup()) != 0) {
