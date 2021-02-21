@@ -12,6 +12,7 @@
 #define EXIT_MAIN -1
 #define PRACTICE_MIN 1
 #define PRACTICE_MAX 1001
+#define QUOTES "quotedata.txt"
 
 typedef struct {
     char *typed;

@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
   int practice_counter = 0;
   int n_samples;
   if(argv[1] == NULL) {
-    int n_samples = get_mode_option();
+    n_samples = get_mode_option();
     if(n_samples == EXIT_MAIN) {
     exit(EXIT_SUCCESS);
     }
@@ -35,6 +35,8 @@ int main(int argc, char **argv) {
     if((error = setup()) != 0) {
       exit(EXIT_FAILURE);
       } 
+    wmove(stdscr, 0, 0);
+    printf("Press 9 to ESC : %d/%d", practice_counter + 1, n_samples);
     buff.index = 0;
     memset(buff.typed, 0, sizeof(char) * MAX_CHARS);
     memset(target, 0, sizeof(char) * MAX_CHARS);
@@ -44,7 +46,6 @@ int main(int argc, char **argv) {
     time_t start_timer = time(NULL);
     pstate.mistakes = 0;
     pstate.finished = FALSE;
-    
     while(pstate.finished == FALSE) {
       wrefresh(stdscr);
       int ch = getch();
@@ -98,8 +99,8 @@ void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
     }
   }
   wmove(stdscr, 0, 0);
-  addstr("Press 9 to ESC");
-  wmove(stdscr, 2, 0);
+  wprintw(stdscr, "Press 9 to ESC");
+  wmove(stdscr, 4, 0);
   wrefresh(stdscr);
   for(i = 0; i < strlen(target_text); i++) {
     if(target_text[i] == typed_text[i]) {
@@ -138,7 +139,7 @@ void get_target_text(char* buffer) {
     size_t buffsize = MAX_CHARS;
     int quote_num = rand() % (NUM_TEXTS - 1);
     FILE* file;
-    if((file = fopen("quotedata.txt", "r")) == NULL) {
+    if((file = fopen(QUOTES, "r")) == NULL) {
       fprintf(stderr, "Error: Could not read from file\n");
     }
     for(int i = 0; i < quote_num; i++) {
