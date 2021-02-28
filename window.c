@@ -29,19 +29,19 @@ int main(int argc, char **argv) {
   else {
     n_samples = atoi(argv[1]);
   }
-  
-  while(practice_counter < n_samples) {
-    int p;
-    if((error = setup()) != 0) {
+  if((error = setup()) != 0) {
       exit(EXIT_FAILURE);
       } 
-    wmove(stdscr, 0, 0);
-    printf("Press 9 to ESC : %d/%d", practice_counter + 1, n_samples);
+  while(practice_counter < n_samples) {
+    int p;
     buff.index = 0;
     memset(buff.typed, 0, sizeof(char) * MAX_CHARS);
     memset(target, 0, sizeof(char) * MAX_CHARS);
     get_target_text(target);
     (void) system("clear");
+    clear();
+    wmove(stdscr, 0, 0);
+    printw("Press 9 to ESC : %d/%d", practice_counter + 1, n_samples);
     render_scr(target, buff.typed, &pstate);
     time_t start_timer = time(NULL);
     pstate.mistakes = 0;
@@ -84,7 +84,6 @@ void set_cursor_offset(int y_offset, int x_offset) {
   int x, y;
   getyx(stdscr, y, x);
   wmove(stdscr, y + y_offset, x + x_offset);
-  wrefresh(stdscr);
 }
 
 //redraw screen to update match between paragraph and typed text
@@ -98,10 +97,7 @@ void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
       continue;
     }
   }
-  wmove(stdscr, 0, 0);
-  wprintw(stdscr, "Press 9 to ESC");
   wmove(stdscr, 4, 0);
-  wrefresh(stdscr);
   for(i = 0; i < strlen(target_text); i++) {
     if(target_text[i] == typed_text[i]) {
       addch(target_text[i] | COLOR_PAIR(2));
@@ -129,9 +125,7 @@ void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
     for(i = 0; i < len_typed; i++) {
       addch(typed_text[i]);
     }
-    
   }
-  wrefresh(stdscr);
 }
 
 //picks from a sample of the quotes
