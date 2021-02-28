@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   }
   if((error = setup()) != 0) {
       exit(EXIT_FAILURE);
-      } 
+  } 
   
   while(practice_counter < n_samples) {
     
@@ -206,15 +206,16 @@ int get_wc(char *str) {
 
 //get action from user at program start
 int get_mode_option(void) {
-  char* get_option;
-  size_t option_buff_len = MAX_CHARS;
+  char get_option[MAX_CHARS];
+  const char* sel_practice[3] = {"P\n", "p\n", "practice\n"};
+  const char * sel_stats[3] = {"S\n", "s\n", "stats\n"}; 
   fprintf(stdout, "Practice (P), or view Stats (S)?\n");
   while(TRUE) {
-    getline(&get_option, &option_buff_len, stdin);
-    if(strcmp(get_option, "P\n") == 0 || strcmp(get_option,"p\n") == 0 || strcmp(get_option,"practice\n") == 0) {
+   fgets(get_option, MAX_CHARS, stdin);
+    if(check_str_mathches(get_option, sel_practice, 3)) {
       printf("How many typing samples?\n");
       while(TRUE) {
-        getline(&get_option, &option_buff_len, stdin);
+        fgets(get_option, MAX_CHARS, stdin);
         int n_samples = atoi(get_option);
         if(n_samples >= PRACTICE_MIN && n_samples <= PRACTICE_MAX) {
           return n_samples;
@@ -222,7 +223,7 @@ int get_mode_option(void) {
         fprintf(stdout, "Please choose number between 1 and 1000\n");
       }
     }
-    else if(strcmp(get_option,"S\n") == 0 || strcmp(get_option,"s\n") == 0 || strcmp(get_option,"stats\n") == 0){
+    else if(check_str_mathches(get_option, sel_stats, 3)) {
       show_stats();
       return(EXIT_MAIN);
     }
@@ -255,3 +256,10 @@ void show_stats(void) {
   }
 }
 
+bool check_str_mathches(char *str, const char **comparisons, int n) {
+  for(int i = 0; i < n; i++) {
+    if(!strcmp(str, comparisons[i])) 
+    { return(true); }
+  }
+  return(false);
+}
