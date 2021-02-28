@@ -13,6 +13,7 @@
 #define PRACTICE_MIN 1
 #define PRACTICE_MAX 1001
 #define QUOTES "quotedata.txt"
+#define STATS_FLAG "-S"
 
 typedef struct {
     char *typed;

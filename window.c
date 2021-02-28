@@ -7,9 +7,18 @@
 #include <time.h>
 
 int main(int argc, char **argv) {
-  if(argc > 2) {
-    fprintf(stdout, "Usage: ./typescore [practice samples]\n");
-    exit(EXIT_FAILURE);
+  
+  if(argc > 1) {
+    if(argc > 2 || (strcmp(argv[1], STATS_FLAG) && !atoi(argv[1]))) {
+      fprintf(stdout, "Usage: ./typescore [practice samples | -S ]\
+      \n practice samples : number of paragraphs in practice session\
+      \n -S: view your stats\n");
+      exit(EXIT_FAILURE);
+    }
+    if(!strcmp(argv[1], STATS_FLAG)) {
+      show_stats(); 
+      exit(EXIT_SUCCESS);
+    }
   }
   
   srand(time(NULL));
@@ -229,7 +238,6 @@ int get_mode_option(void) {
     }
     else{
       fprintf(stdout, "Invalid option: choose P for practice session or S to view stats\n");
-      fprintf(stdout, "You chose: %s\n", get_option);
     }
   }
   return(EXIT_MAIN);
