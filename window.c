@@ -13,13 +13,12 @@ int main(int argc, char **argv) {
   }
   
   srand(time(NULL));
-  int error, av_wpm;
+  int error, av_wpm, n_samples;
+  int practice_counter = 0;
   Buffer buff;
   Pstate pstate;
   buff.typed = (char*) calloc(MAX_CHARS, sizeof(char));
   char *target = (char*) calloc(MAX_CHARS, sizeof(char));
-  int practice_counter = 0;
-  int n_samples;
   if(argv[1] == NULL) {
     n_samples = get_mode_option();
     if(n_samples == EXIT_MAIN) {
@@ -32,13 +31,13 @@ int main(int argc, char **argv) {
   if((error = setup()) != 0) {
       exit(EXIT_FAILURE);
       } 
+  
   while(practice_counter < n_samples) {
-    int p;
+    
     buff.index = 0;
     memset(buff.typed, 0, sizeof(char) * MAX_CHARS);
     memset(target, 0, sizeof(char) * MAX_CHARS);
     get_target_text(target);
-    (void) system("clear");
     clear();
     wmove(stdscr, 0, 0);
     printw("Press 9 to ESC : %d/%d", practice_counter + 1, n_samples);
@@ -50,14 +49,12 @@ int main(int argc, char **argv) {
       wrefresh(stdscr);
       int ch = getch();
       if((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
-        p = buff.index;
-        buff.typed[p] = ch;
+        buff.typed[ buff.index] = ch;
         buff.index++;
         render_scr(target, buff.typed, &pstate);
       }
       else if((ch >= CH_SPACE && ch <= CH_FSLASH) || (ch >= CH_COLON && ch <= CH_AT)) {
-        p = buff.index;
-        buff.typed[p] = ch;
+        buff.typed[ buff.index] = ch;
         buff.index++;
         render_scr(target, buff.typed, &pstate);
       }
