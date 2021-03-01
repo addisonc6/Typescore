@@ -13,7 +13,9 @@
 #define PRACTICE_MIN 1
 #define PRACTICE_MAX 1001
 #define QUOTES "quotedata.txt"
+#define STATS "stats.txt"
 #define STATS_FLAG "-S"
+#define RESET_FLAG "-R"
 
 typedef struct {
     char *typed;
@@ -33,5 +35,6 @@ int setup(void);
 int get_wc(char *str);
 int get_mode_option(void);
 void show_stats(void);
+void try_reset_stats();
 void update_av_wpm_accuracy(int elapsed, int num_words, float acc); 
 bool check_str_mathches(char *str, const char **comparisons, int n);

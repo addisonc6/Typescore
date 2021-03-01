@@ -9,14 +9,20 @@
 int main(int argc, char **argv) {
   
   if(argc > 1) {
-    if(argc > 2 || (strcmp(argv[1], STATS_FLAG) && !atoi(argv[1]))) {
-      fprintf(stdout, "Usage: ./typescore [practice samples | -S ]\
+    const char *flags[2] = {STATS_FLAG, RESET_FLAG};
+    if(argc > 2 || !check_str_mathches(argv[1], flags, 2) && !atoi(argv[1])) {
+      fprintf(stdout, "Usage: ./typescore [practice samples | -S | -R ]\
       \n practice samples : number of paragraphs in practice session\
-      \n -S: view your stats\n");
+      \n -S: view your stats\
+      \n -R: reset stats\n");
       exit(EXIT_FAILURE);
     }
     if(!strcmp(argv[1], STATS_FLAG)) {
       show_stats(); 
+      exit(EXIT_SUCCESS);
+    }
+    if(!strcmp(argv[1], RESET_FLAG)) {
+      try_reset_stats(); 
       exit(EXIT_SUCCESS);
     }
   }
@@ -177,7 +183,7 @@ int setup(void) {
 void update_av_wpm_accuracy(int elapsed, int num_words, float acc) {
   int wpm = (int) (( (float) num_words / (float) elapsed) * 60);
   FILE *file;
-  if((file = fopen("stats.txt", "r")) == NULL) {
+  if((file = fopen(STATS, "rb")) == NULL) {
     fprintf(stderr, "Error: Could not read file\n");
     exit(EXIT_FAILURE);
   }
@@ -194,7 +200,7 @@ void update_av_wpm_accuracy(int elapsed, int num_words, float acc) {
   int av_wpm = (int) ((((float) prev_wpm * wpm_occurences) + wpm) / (wpm_occurences + 1));
   float av_acc = (((prev_acc * acc_occurences) + acc) / (acc_occurences + 1));
   (void) fclose(file);
-  if((file = fopen("stats.txt", "w")) == NULL) {
+  if((file = fopen(STATS, "wb")) == NULL) {
     fprintf(stderr, "Error: Could not write to file\n");
     exit(EXIT_FAILURE);
   }
@@ -249,7 +255,7 @@ void show_stats(void) {
   int wpm_occurence;
   float acc;
   FILE *filep;
-  if((filep = fopen("stats.txt", "rb")) != NULL) {
+  if((filep = fopen(STATS, "rb")) != NULL) {
     fscanf(filep, "%d", &wpm);
     fscanf(filep, "%d", &wpm_occurence);
     fscanf(filep, "%f", &acc);
@@ -264,6 +270,27 @@ void show_stats(void) {
   }
 }
 
+//resets stats upon confirmation
+void try_reset_stats() {
+  char resp;
+  fprintf(stdout, "Are you sure you want to reset stats?\
+   Type Y to reset, and other key to cancel\n");
+  fscanf(stdin, "%c", &resp);
+  if(resp == 'Y') {
+    FILE *filep;
+    if((filep = fopen(STATS, "wb")) == NULL) {
+      fprintf(stderr, "Could not open stats file\n");
+      return;
+     }
+     fprintf(filep, "0\n0\n0\n0");
+     (void) fclose(filep);
+     fprintf(stdout, "Stats reset\n");
+     return;
+   }
+   fprintf(stdout, "Stats not reset\n");
+}
+
+//Check if string matches any of multiple strings
 bool check_str_mathches(char *str, const char **comparisons, int n) {
   for(int i = 0; i < n; i++) {
     if(!strcmp(str, comparisons[i])) 
