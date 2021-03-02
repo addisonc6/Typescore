@@ -42,6 +42,10 @@ int main(int argc, char **argv) {
   }
   else {
     n_samples = atoi(argv[1]);
+    if(n_samples < PRACTICE_MIN || n_samples > PRACTICE_MAX) {
+      fprintf(stdout, "Please choose number between %d and %d\n", PRACTICE_MIN, PRACTICE_MAX);
+      exit(EXIT_SUCCESS);
+    }
   }
   if((error = setup()) != 0) {
       exit(EXIT_FAILURE);
@@ -145,7 +149,7 @@ void get_target_text(char* buffer) {
     size_t buffsize = MAX_CHARS;
     int quote_num = rand() % (NUM_TEXTS - 1);
     FILE* file;
-    if((file = fopen(QUOTES, "r")) == NULL) {
+    if((file = fopen(QUOTES, "rb")) == NULL) {
       fprintf(stderr, "Error: Could not read from file\n");
     }
     for(int i = 0; i < quote_num; i++) {
@@ -235,7 +239,7 @@ int get_mode_option(void) {
         if(n_samples >= PRACTICE_MIN && n_samples <= PRACTICE_MAX) {
           return n_samples;
         }
-        fprintf(stdout, "Please choose number between 1 and 1000\n");
+        fprintf(stdout, "Please choose number between %d and %d\n", PRACTICE_MIN, PRACTICE_MAX);
       }
     }
     else if(check_str_mathches(get_option, sel_stats, 3)) {

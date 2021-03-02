@@ -11,7 +11,7 @@
 #define NUM_TEXTS 6000
 #define EXIT_MAIN -1
 #define PRACTICE_MIN 1
-#define PRACTICE_MAX 1001
+#define PRACTICE_MAX 1000
 #define QUOTES "quotedata.txt"
 #define STATS "stats.txt"
 #define STATS_FLAG "-S"
