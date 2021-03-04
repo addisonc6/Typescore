@@ -59,11 +59,11 @@ int main(int argc, char **argv) {
     get_target_text(target);
     clear();
     wmove(stdscr, 0, 0);
-    printw("Press 9 to ESC : %d/%d", practice_counter + 1, n_samples);
-    render_scr(target, buff.typed, &pstate);
     time_t start_timer = time(NULL);
     pstate.mistakes = 0;
     pstate.finished = FALSE;
+    printw("Press 9 to ESC : %d/%d", practice_counter + 1, n_samples);
+    render_scr(target, buff.typed, &pstate);
     while(pstate.finished == FALSE) {
       wrefresh(stdscr);
       int ch = getch();
