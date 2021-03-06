@@ -148,14 +148,14 @@ void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
 void get_target_text(char* buffer) {
     size_t buffsize = MAX_CHARS;
     int quote_num = rand() % (NUM_TEXTS - 1);
-    FILE* file;
-    if((file = fopen(QUOTES, "rb")) == NULL) {
+    FILE* filep;
+    if((filep = fopen(QUOTES, "rb")) == NULL) {
       fprintf(stderr, "Error: Could not read from file\n");
     }
     for(int i = 0; i < quote_num; i++) {
-      getline(&buffer, &buffsize, file);
+      getline(&buffer, &buffsize, filep);
     }
-    (void) fclose(file);
+    (void) fclose(filep);
 }
 
 //curses initializations
@@ -212,7 +212,7 @@ void update_av_wpm_accuracy(int elapsed, int num_words, float acc) {
   (void) fclose(file);
 }
 
-//gets word counter in a paragraph
+//returns number of words in a quote
 int get_wc(char *str) {
   int wc = 0;
   for(int i = 0; i < strlen(str); i++){
@@ -255,8 +255,7 @@ int get_mode_option(void) {
 
 //print stats to stdout
 void show_stats(void) {
-  int wpm;
-  int wpm_occurence;
+  int wpm, wpm_occurence;
   float acc;
   FILE *filep;
   if((filep = fopen(STATS, "rb")) != NULL) {
