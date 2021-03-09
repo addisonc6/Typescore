@@ -65,15 +65,15 @@ int main(int argc, char **argv) {
     printw("Press 9 to ESC : %d/%d", practice_counter + 1, n_samples);
     render_scr(target, buff.typed, &pstate);
     while(pstate.finished == FALSE) {
-      wrefresh(stdscr);
+      refresh();
       int ch = getch();
       if((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
-        buff.typed[ buff.index] = ch;
+        buff.typed[buff.index] = ch;
         buff.index++;
         render_scr(target, buff.typed, &pstate);
       }
       else if((ch >= CH_SPACE && ch <= CH_FSLASH) || (ch >= CH_COLON && ch <= CH_AT)) {
-        buff.typed[ buff.index] = ch;
+        buff.typed[buff.index] = ch;
         buff.index++;
         render_scr(target, buff.typed, &pstate);
       }
