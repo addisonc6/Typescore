@@ -116,17 +116,17 @@ void render_scr(char *target_text, char *typed_text, Pstate *pstate) {
   wmove(stdscr, 4, 0);
   for(i = 0; i < strlen(target_text); i++) {
     if(target_text[i] == typed_text[i]) {
-      addch(target_text[i] | COLOR_PAIR(2));
+      addch(target_text[i] | COLOR_PAIR(PAIR_GREEN));
       correct++;
     }
     else if(i == strlen(typed_text)) {
       addch(target_text[i] | A_UNDERLINE);
     }
     else if(strlen(typed_text) < i + 1) {
-      addch(target_text[i] | COLOR_PAIR(3));
+      addch(target_text[i] | COLOR_PAIR(PAIR_WHITE));
     }
     else {
-      addch(target_text[i] | COLOR_PAIR(1));
+      addch(target_text[i] | COLOR_PAIR(PAIR_YELLOW));
       pstate->mistakes++;
     }
   }
@@ -277,7 +277,7 @@ void show_stats(void) {
 void try_reset_stats() {
   char resp;
   fprintf(stdout, "Are you sure you want to reset stats?\
-   Type Y to reset, and other key to cancel\n");
+  Type Y to reset, anything else to cancel\n > ");
   fscanf(stdin, "%c", &resp);
   if(resp == 'Y') {
     FILE *filep;

@@ -16,6 +16,9 @@
 #define STATS "stats.txt"
 #define STATS_FLAG "-S"
 #define RESET_FLAG "-R"
+#define PAIR_YELLOW 1
+#define PAIR_GREEN 2
+#define PAIR_WHITE 3
 
 typedef struct {
     char *typed;
